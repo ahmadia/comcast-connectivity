@@ -9,7 +9,7 @@ checkdomain=google.com
 function portscan
 {
    echo "Starting port scan of $checkdomain port 80"; 
-  if nc -zw1 $checkdomain  80; then
+  if nc -z -w 2 $checkdomain  80; then
      echo "Port scan good, $checkdomain port 80 available"; 
   else
     echo "Port scan of $checkdomain port 80 failed."
@@ -20,7 +20,7 @@ function pingnet
 {
   #Google has the most reliable host name. Feel free to change it.
    echo "Pinging $checkdomain to check for internet connection." && echo; 
-  ping -c 4 $checkdomain
+  ping -c 4 -t 3 $checkdomain
 
   if [ $? -eq 0 ]
     then
@@ -37,7 +37,7 @@ function pingdns
 {
   #Grab first DNS server from /etc/resolv.conf
    echo "Pinging first DNS server in resolv.conf ($checkdns) to check name resolution" && echo; 
-  ping -c 4 $checkdns
+  ping -c 4 -t 3 $checkdns
     if [ $? -eq 0 ]
     then
        echo && echo "$checkdns pingable. Proceeding with domain check."; 
@@ -68,21 +68,21 @@ if [ "$GW" = "" ]; then
 #    exit 1
 fi
 
-ping -c 4 $GW
+ping -c 4 -t 3 $GW
 
 if [ $? -eq 0 ]
 then
    echo && echo "LAN Gateway pingable. Proceeding with internet connectivity check."; 
   pingdns
   pingnet
-  portscan
+  #portscan
   httpreq
   exit 0
 else
   echo && echo "Something is wrong with LAN (Gateway unreachable)"
   pingdns
   pingnet
-  portscan
+  #portscan
   httpreq
 
   #Insert any command you like here
